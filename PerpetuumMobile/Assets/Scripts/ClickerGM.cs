@@ -121,7 +121,7 @@ public class ClickerGM : MonoBehaviour
             EnergyPerSecTxt.text = energyPerSec.ToString();
 
             //setting new cost for the srength upgrade
-            costOfEPerSecUpg = Mathf.Floor((baseEPerSecUpgCost + upgradesEPerSec) * Mathf.Pow(strengthMult, upgradesStrengthOfClick));
+            costOfEPerSecUpg = Mathf.Floor((baseEPerSecUpgCost + upgradesEPerSec) * Mathf.Pow(energyMult, upgradesEPerSec));
 
             EnergyPerSecCostTxt.text = costOfEPerSecUpg.ToString();
         }         
