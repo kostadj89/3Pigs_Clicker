@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ public class ClickerGM : MonoBehaviour
 
     #region public
 
-    //base values
+    //base values    
     public int baseClickStrength = 1;
     public int baseStrengthUpgCost = 10;
 
@@ -21,10 +22,10 @@ public class ClickerGM : MonoBehaviour
     public int baseLevel = 1;
     //values
     //this will depend on the level
-    public double moneyPerEnergy = 1;
+    public double levelCoinsPerEnergy = 1;
 
-    // text for the score
-    public Text ScoreTxt;
+    // text for the coins
+    public Text CoinsScoreTxt;
     // text for the strength of click displayed on main genrate button
     public Text ClickStrengthTxt;
     // text for the energy per second
@@ -35,11 +36,17 @@ public class ClickerGM : MonoBehaviour
     public float strengthMult = 1.08f;
     public float energyMult = 2f;
 
+    public Text CoinsPerEnergy;
+
+
     #endregion public
 
     #region private
 
-    private double score;
+    //list of upgrade bttns
+    private List<UpgradeButton> upgradeButtons;
+
+    private double coins;
 
     //relating to strength of click upgrade
     private double clickStrength = 1;
@@ -50,87 +57,44 @@ public class ClickerGM : MonoBehaviour
     //private double costOfEPerSecUpg = baseEPerSecUpgCost;
     //upgrades
     private int upgradesStrengthOfClick = 0;
-    private int upgradesEPerSec = 0;    
-    private int upgradesMoreMoneyPerEnergy = 0;
+    private int upgradesEPerSec = 0;
 
     #endregion private
+
+    private void Awake()
+    {
+        upgradeButtons = new List<UpgradeButton>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         /*if we're going to get a save system, then here we could calculate all thevalues based on the level of upgrades*/
-
         StartCoroutine(AddEnergyPerSecond());
     }
 
     // Update is called once per frame
     void Update()
     {
-        //score += Mathf.Floor((float)(energyPerSec * Time.deltaTime));
-        //ScoreTxt.text = score.ToString();
+
     }
 
     #region methods
     public void GenerateClick()
     {
-        score += clickStrength * moneyPerEnergy;
-        ScoreTxt.text = score.ToString();
+        ConvertAndAddToCoins(clickStrength);//coins += clickStrength * levelCoinsPerEnergy;        
     }
 
-    //public void UpgradeClickStrength()
-    //{
-    //    if ( score >= costOfStrengthUpg)
-    //    {
-    //        //inc number of bought upgrades
-    //        upgradesStrengthOfClick++;
+    internal void ConvertAndAddToCoins(double value)
+    {
+        coins+= value * levelCoinsPerEnergy;
+        CoinsScoreTxt.text = coins.ToString();
+    }
 
-    //        //deduct the cost from score
-    //        score -= costOfStrengthUpg;
-    //        ScoreTxt.text = score.ToString();  
-            
-    //        //setting new cost for the srength upgrade
-    //        costOfStrengthUpg = Mathf.Floor((baseStrengthUpgCost+ upgradesStrengthOfClick) * Mathf.Pow(strengthMult, upgradesStrengthOfClick));
-    //        ClickStrengthCostTxt.text = costOfStrengthUpg.ToString();
-
-    //        //setting new strength
-    //        clickStrength = baseClickStrength + upgradesStrengthOfClick;
-            
-    //        //temporary for debbugging
-    //        ClickStrengthUpgTxt.text = upgradesStrengthOfClick.ToString();
-
-    //        ClickStrengthTxt.text = clickStrength.ToString();
-    //    }
-        
-    //}
-
-    //public void UpgradeEnergyPerSec()
-    //{
-    //    if (score >= costOfEPerSecUpg)
-    //    {
-    //        //inc number of bought upgrades
-    //        upgradesEPerSec++;
-
-    //        //deduct the cost from score
-    //        score -= costOfEPerSecUpg;
-    //        ScoreTxt.text = score.ToString();
-            
-    //        energyPerSec = baseEPerSec + upgradesEPerSec;
-
-    //        EnergyPerSecTxt.text = energyPerSec.ToString();
-
-    //        //setting new cost for the srength upgrade
-    //        costOfEPerSecUpg = Mathf.Floor((baseEPerSecUpgCost + upgradesEPerSec) * Mathf.Pow(energyMult, upgradesEPerSec));
-
-    //        EnergyPerSecCostTxt.text = costOfEPerSecUpg.ToString();
-    //    }         
-    //}
-
-    public double GetCurrentScore() { return score; }
-
-    public void SetScore(double value) { score = value; ScoreTxt.text = score.ToString(); }
+    public double GetCurrentCoins() { return coins; }
 
     public double GetClickStrength() { return clickStrength; }
-    public double GetBaseClickStrength() { return baseClickStrength; }
+    
     public void SetClickStrength(double value) { clickStrength = value; ClickStrengthTxt.text = clickStrength.ToString(); }
 
     public double GetEPerSec() { return energyPerSec; }
@@ -138,31 +102,45 @@ public class ClickerGM : MonoBehaviour
 
     public void SetEPerSec(double value) { energyPerSec = value; EnergyPerSecTxt.text = energyPerSec.ToString(); }
 
-    public double GetMoneyPerE() { return moneyPerEnergy; }
-    public void SetMoneyPerE(double value) { moneyPerEnergy = value;  }
+    public double GetCoinsPerE() { return levelCoinsPerEnergy; }
+    public void SetCoinsPerE(double value) { levelCoinsPerEnergy = value;  }
     #endregion methods
 
     #region coroutine
     IEnumerator AddEnergyPerSecond()
     {
         while (true)
-        {
-            score += energyPerSec;
-            ScoreTxt.text = score.ToString();
+        {           
+            ConvertAndAddToCoins(energyPerSec);
 
             yield return new WaitForSeconds(1);
         }
     }
 
-    public double GetBaseLevel()
+    public int GetBaseLevel()
     {
         return baseLevel;
     }
 
     public void SetLevel(double targetValue)
     {
-        moneyPerEnergy = targetValue;
-        LevelTxt.text = moneyPerEnergy.ToString();
+        levelCoinsPerEnergy = targetValue;        
+        LevelTxt.text = levelCoinsPerEnergy.ToString();
+        CoinsPerEnergy.text = "1 energy = " + levelCoinsPerEnergy + " coins";
+
+        SetEPerSec(0);
+        SetClickStrength(1);
+
+        //when we get to the higher level energy is worth more money(coins ie on level 2, 1 energy will be 2 coins(coins points) ), but we reset all of the upgrades
+        foreach (UpgradeButton upgradeButton in upgradeButtons)
+        {
+            upgradeButton.ResetUpgrades();
+        }
+    }
+
+    internal void AddToUpgradeButtons(UpgradeButton upgradeButton)
+    {
+        upgradeButtons.Add(upgradeButton);
     }
     #endregion coroutine
 }

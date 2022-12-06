@@ -34,6 +34,9 @@ public class UpgradeButton : MonoBehaviour
         gameManager = gameManagerTransform.GetComponent<ClickerGM>();
         cost = Mathf.Floor((float)((baseCost + numberOfUpgrades) * Mathf.Pow((float)costMultiplyer, numberOfUpgrades)));
         costTxt.text = cost.ToString();
+
+        //add yourself to the list of upgrade buttons
+        gameManager.AddToUpgradeButtons(this);
     }
 
     // Update is called once per frame
@@ -43,30 +46,38 @@ public class UpgradeButton : MonoBehaviour
 
     public void Upgrade()
     {
-        double currentScore = gameManager.GetCurrentScore();
+        double currentScore = gameManager.GetCurrentCoins();
         if (currentScore >= cost)
         {
             //inc number of bought upgrades
             numberOfUpgrades++;
 
-            //deduct the cost from score
+            //deduct the cost from coins
             currentScore -= cost;
-            gameManager.SetScore(currentScore);
+            gameManager.ConvertAndAddToCoins((-1)*cost);
 
             //setting new value based on baseValue and number of upgrades
             double targetValue = CalculateValue();       
             
-            SetTargetValue(targetValue);
+            SendTargetValue(targetValue);
 
             //setting new cost
             cost = Mathf.Floor((float)((baseCost + numberOfUpgrades) * Mathf.Pow((float)costMultiplyer, numberOfUpgrades)));
 
             numberOfUpgradesTxt.text = numberOfUpgrades.ToString();
             costTxt.text = cost.ToString();
+
+            PlaySound();
         }
     }
 
-    private void SetTargetValue(double targetValue)
+    private void PlaySound()
+    {
+        return;
+    }
+
+    //this method sends the values of various fields to the game manager, ie. strength of the click, energy per second, or increases level number
+    private void SendTargetValue(double targetValue)
     {
         switch (upgradeType)
         {
@@ -89,15 +100,31 @@ public class UpgradeButton : MonoBehaviour
         switch (upgradeType)
         {
             case UpgradeType.ClickStrength:
-                return gameManager.GetBaseClickStrength() + numberOfUpgrades * valueMultiplyer; ;
+                //return gameManager.GetClickStrength() + numberOfUpgrades * valueMultiplyer ;
+                return gameManager.baseClickStrength + numberOfUpgrades * valueMultiplyer;
             case UpgradeType.EnergyPerSecond:
                 return gameManager.GetEPerSec()+valueMultiplyer;
             case UpgradeType.Level:
-                return gameManager.GetBaseLevel();
+                return gameManager.GetCoinsPerE()+1;
             default:
                 return 0;
         }
 
 
+    }
+
+    public void ResetUpgrades()
+    {
+        //we want to show on which level we're on
+        if (upgradeType != UpgradeType.Level)
+        {
+            numberOfUpgrades = 0;
+            numberOfUpgradesTxt.text = numberOfUpgrades.ToString();
+        }
+        
+        //reset all costs
+        cost = baseCost;
+        costTxt.text = cost.ToString();
+        
     }
 }
