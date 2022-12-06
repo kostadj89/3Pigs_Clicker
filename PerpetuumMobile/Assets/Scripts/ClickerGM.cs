@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,20 +10,28 @@ public class ClickerGM : MonoBehaviour
     const int baseClickStrength = 1;
     const int baseStrengthUpgCost = 10;
     const int baseEPerSec = 0;
-    const int baseEPerSecUpgCost = 1000;
+    const int baseEPerSecUpgCost = 100;
     #endregion const
     #region public
 
     // text for the score
     public Text ScoreTxt;
+    // text for the strength of click displayed on main genrate button
+    public Text ClickStrengthTxt;
+
     // text for the energy per second
     public Text EnergyPerSecTxt;
-    // text for the strength of click displayed on main genrate button
-    public Text ClickStrengthTxt;    
+    // text for the energy per second upgrade cost
+    public Text EnergyPerSecCostTxt;
+
+
     // text for the number of upgrades for click strength
     public Text ClickStrengthUpgTxt;
     //strength cost
     public Text ClickStrengthCostTxt;
+
+    public float strengthMult = 1.08f;
+    public float energyMult = 2f;
 
     #endregion public
 
@@ -39,7 +48,7 @@ public class ClickerGM : MonoBehaviour
     private double costOfEPerSecUpg = baseEPerSecUpgCost;
     //upgrades
     private int upgradesStrengthOfClick = 0;
-    private int upgradesEnergyAuto = 0;    
+    private int upgradesEPerSec = 0;    
 
     //values
     //this will depend on the level
@@ -53,14 +62,17 @@ public class ClickerGM : MonoBehaviour
     {
         /*if we're going to get a save system, then here we could calculate all thevalues based on the level of upgrades*/
 
+        StartCoroutine(AddEnergyPerSecond());
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        //score += Mathf.Floor((float)(energyPerSec * Time.deltaTime));
+        //ScoreTxt.text = score.ToString();
     }
 
+    #region methods
     public void Click()
     {
         score += strengthOfClick * moneyPerEnergy;
@@ -79,7 +91,7 @@ public class ClickerGM : MonoBehaviour
             ScoreTxt.text = score.ToString();  
             
             //setting new cost for the srength upgrade
-            costOfStrengthUpg = (baseStrengthUpgCost+ upgradesStrengthOfClick) * (0.5 * Mathf.Pow(2, upgradesStrengthOfClick));
+            costOfStrengthUpg = Mathf.Floor((baseStrengthUpgCost+ upgradesStrengthOfClick) * Mathf.Pow(strengthMult, upgradesStrengthOfClick));
             ClickStrengthCostTxt.text = costOfStrengthUpg.ToString();
 
             //setting new strength
@@ -95,11 +107,37 @@ public class ClickerGM : MonoBehaviour
 
     public void UpgradeEnergyPerSec()
     {
-        upgradesEnergyAuto++;
-        energyPerSec = baseEPerSec + upgradesEnergyAuto;
-        //temporary for debbugging
-        //ClickStrengthUpgTxt.text = upgradesStrengthOfClick.ToString();
+        if (score >= costOfEPerSecUpg)
+        {
+            //inc number of bought upgrades
+            upgradesEPerSec++;
 
-        EnergyPerSecTxt.text = energyPerSec.ToString();
+            //deduct the cost from score
+            score -= costOfEPerSecUpg;
+            ScoreTxt.text = score.ToString();
+            
+            energyPerSec = baseEPerSec + upgradesEPerSec;
+
+            EnergyPerSecTxt.text = energyPerSec.ToString();
+
+            //setting new cost for the srength upgrade
+            costOfEPerSecUpg = Mathf.Floor((baseEPerSecUpgCost + upgradesEPerSec) * Mathf.Pow(strengthMult, upgradesStrengthOfClick));
+
+            EnergyPerSecCostTxt.text = costOfEPerSecUpg.ToString();
+        }         
     }
+    #endregion methods
+
+    #region coroutine
+    IEnumerator AddEnergyPerSecond()
+    {
+        while (true)
+        {
+            score += energyPerSec;
+            ScoreTxt.text = score.ToString();
+
+            yield return new WaitForSeconds(1);
+        }
+    }
+    #endregion coroutine
 }
