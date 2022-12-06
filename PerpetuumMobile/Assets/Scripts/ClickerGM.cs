@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
@@ -7,28 +8,29 @@ public class ClickerGM : MonoBehaviour
 {
     #region const
     //maybe expose these as public vars to tune from editor
-    const int baseClickStrength = 1;
-    const int baseStrengthUpgCost = 10;
-    const int baseEPerSec = 0;
-    const int baseEPerSecUpgCost = 100;
     #endregion const
+
     #region public
+
+    //base values
+    public int baseClickStrength = 1;
+    public int baseStrengthUpgCost = 10;
+
+    public int baseEPerSec = 0;
+    public int baseEPerSecUpgCost = 100;
+    public int baseLevel = 1;
+    //values
+    //this will depend on the level
+    public double moneyPerEnergy = 1;
 
     // text for the score
     public Text ScoreTxt;
     // text for the strength of click displayed on main genrate button
     public Text ClickStrengthTxt;
-
     // text for the energy per second
     public Text EnergyPerSecTxt;
-    // text for the energy per second upgrade cost
-    public Text EnergyPerSecCostTxt;
 
-
-    // text for the number of upgrades for click strength
-    public Text ClickStrengthUpgTxt;
-    //strength cost
-    public Text ClickStrengthCostTxt;
+    public Text LevelTxt;
 
     public float strengthMult = 1.08f;
     public float energyMult = 2f;
@@ -40,19 +42,15 @@ public class ClickerGM : MonoBehaviour
     private double score;
 
     //relating to strength of click upgrade
-    private double strengthOfClick = baseClickStrength;
-    private double costOfStrengthUpg = baseStrengthUpgCost ;
+    private double clickStrength = 1;
+    //private double costOfStrengthUpg = baseStrengthUpgCost ;
 
     //relating to energy per second upgrade
     private double energyPerSec = 0;
-    private double costOfEPerSecUpg = baseEPerSecUpgCost;
+    //private double costOfEPerSecUpg = baseEPerSecUpgCost;
     //upgrades
     private int upgradesStrengthOfClick = 0;
     private int upgradesEPerSec = 0;    
-
-    //values
-    //this will depend on the level
-    private double moneyPerEnergy = 1;
     private int upgradesMoreMoneyPerEnergy = 0;
 
     #endregion private
@@ -73,59 +71,75 @@ public class ClickerGM : MonoBehaviour
     }
 
     #region methods
-    public void Click()
+    public void GenerateClick()
     {
-        score += strengthOfClick * moneyPerEnergy;
+        score += clickStrength * moneyPerEnergy;
         ScoreTxt.text = score.ToString();
     }
 
-    public void UpgradeClickStrength()
-    {
-        if ( score >= costOfStrengthUpg)
-        {
-            //inc number of bought upgrades
-            upgradesStrengthOfClick++;
+    //public void UpgradeClickStrength()
+    //{
+    //    if ( score >= costOfStrengthUpg)
+    //    {
+    //        //inc number of bought upgrades
+    //        upgradesStrengthOfClick++;
 
-            //deduct the cost from score
-            score -= costOfStrengthUpg;
-            ScoreTxt.text = score.ToString();  
+    //        //deduct the cost from score
+    //        score -= costOfStrengthUpg;
+    //        ScoreTxt.text = score.ToString();  
             
-            //setting new cost for the srength upgrade
-            costOfStrengthUpg = Mathf.Floor((baseStrengthUpgCost+ upgradesStrengthOfClick) * Mathf.Pow(strengthMult, upgradesStrengthOfClick));
-            ClickStrengthCostTxt.text = costOfStrengthUpg.ToString();
+    //        //setting new cost for the srength upgrade
+    //        costOfStrengthUpg = Mathf.Floor((baseStrengthUpgCost+ upgradesStrengthOfClick) * Mathf.Pow(strengthMult, upgradesStrengthOfClick));
+    //        ClickStrengthCostTxt.text = costOfStrengthUpg.ToString();
 
-            //setting new strength
-            strengthOfClick = baseClickStrength + upgradesStrengthOfClick;
+    //        //setting new strength
+    //        clickStrength = baseClickStrength + upgradesStrengthOfClick;
             
-            //temporary for debbugging
-            ClickStrengthUpgTxt.text = upgradesStrengthOfClick.ToString();
+    //        //temporary for debbugging
+    //        ClickStrengthUpgTxt.text = upgradesStrengthOfClick.ToString();
 
-            ClickStrengthTxt.text = strengthOfClick.ToString();
-        }
+    //        ClickStrengthTxt.text = clickStrength.ToString();
+    //    }
         
-    }
+    //}
 
-    public void UpgradeEnergyPerSec()
-    {
-        if (score >= costOfEPerSecUpg)
-        {
-            //inc number of bought upgrades
-            upgradesEPerSec++;
+    //public void UpgradeEnergyPerSec()
+    //{
+    //    if (score >= costOfEPerSecUpg)
+    //    {
+    //        //inc number of bought upgrades
+    //        upgradesEPerSec++;
 
-            //deduct the cost from score
-            score -= costOfEPerSecUpg;
-            ScoreTxt.text = score.ToString();
+    //        //deduct the cost from score
+    //        score -= costOfEPerSecUpg;
+    //        ScoreTxt.text = score.ToString();
             
-            energyPerSec = baseEPerSec + upgradesEPerSec;
+    //        energyPerSec = baseEPerSec + upgradesEPerSec;
 
-            EnergyPerSecTxt.text = energyPerSec.ToString();
+    //        EnergyPerSecTxt.text = energyPerSec.ToString();
 
-            //setting new cost for the srength upgrade
-            costOfEPerSecUpg = Mathf.Floor((baseEPerSecUpgCost + upgradesEPerSec) * Mathf.Pow(energyMult, upgradesEPerSec));
+    //        //setting new cost for the srength upgrade
+    //        costOfEPerSecUpg = Mathf.Floor((baseEPerSecUpgCost + upgradesEPerSec) * Mathf.Pow(energyMult, upgradesEPerSec));
 
-            EnergyPerSecCostTxt.text = costOfEPerSecUpg.ToString();
-        }         
-    }
+    //        EnergyPerSecCostTxt.text = costOfEPerSecUpg.ToString();
+    //    }         
+    //}
+
+    public double GetCurrentScore() { return score; }
+
+    public void SetScore(double value) { score = value; ScoreTxt.text = score.ToString(); }
+
+    public double GetClickStrength() { return clickStrength; }
+    public double GetBaseClickStrength() { return baseClickStrength; }
+    public void SetClickStrength(double value) { clickStrength = value; ClickStrengthTxt.text = clickStrength.ToString(); }
+
+    public double GetEPerSec() { return energyPerSec; }
+    public double GetBaseEPerSec() { return baseEPerSec; }
+
+    public void SetEPerSec(double value) { energyPerSec = value; EnergyPerSecTxt.text = energyPerSec.ToString(); }
+
+    public double GetMoneyPerE() { return moneyPerEnergy; }
+    public void SetMoneyPerE(double value) { moneyPerEnergy = value;  }
     #endregion methods
 
     #region coroutine
@@ -138,6 +152,17 @@ public class ClickerGM : MonoBehaviour
 
             yield return new WaitForSeconds(1);
         }
+    }
+
+    public double GetBaseLevel()
+    {
+        return baseLevel;
+    }
+
+    public void SetLevel(double targetValue)
+    {
+        moneyPerEnergy = targetValue;
+        LevelTxt.text = moneyPerEnergy.ToString();
     }
     #endregion coroutine
 }
