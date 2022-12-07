@@ -21,21 +21,34 @@ public enum EnergyUpgradeSubtypes
 }
 public class UpgradeButton : MonoBehaviour
 {
+    #region public
+
     public Transform gameManagerTransform;
+    
     public UpgradeType upgradeType;
     public EnergyUpgradeSubtypes energyUpgradeSubtypes = EnergyUpgradeSubtypes.None;
-    public double baseCost=10;
-    public double costMultiplyer=1;
+    
+    public double baseCost = 10;
+    public double costMultiplyer = 1;
     public int valueMultiplyer = 1;
+   
     //value and cost labels
     public Text numberOfUpgradesTxt;
     public Text costTxt;
+
+    #endregion public
+
+    #region private
 
     private int numberOfUpgrades = 0;
     private ClickerGM gameManager;
     private double cost;
     
+    //audio files
+    private AudioSource audioSource;
+    private AudioClip audioClip;
 
+    #endregion private
 
     // Start is called before the first frame update
     void Start()
@@ -46,6 +59,10 @@ public class UpgradeButton : MonoBehaviour
 
         //add yourself to the list of upgrade buttons
         gameManager.AddToUpgradeButtons(this);
+
+        //get sounds
+        audioSource = gameObject.GetComponent<AudioSource>();
+        audioClip = audioSource.clip;
     }
 
     // Update is called once per frame
@@ -74,7 +91,7 @@ public class UpgradeButton : MonoBehaviour
             //setting new cost
             cost = Mathf.Floor((float)((baseCost + numberOfUpgrades) * Mathf.Pow((float)costMultiplyer, numberOfUpgrades)));
 
-            numberOfUpgradesTxt.text = numberOfUpgrades.ToString();
+            numberOfUpgradesTxt.text = upgradeType == UpgradeType.Level ? "LEVEL UP" : numberOfUpgrades.ToString();
             costTxt.text = cost.ToString();
 
             PlaySound();
@@ -118,7 +135,7 @@ public class UpgradeButton : MonoBehaviour
 
     private void PlaySound()
     {
-        return;
+        audioSource.PlayOneShot(audioClip);
     }
 
     //this method sends the values of various fields to the game manager, ie. strength of the click, energy per second, or increases level number

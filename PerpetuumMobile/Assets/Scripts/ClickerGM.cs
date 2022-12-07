@@ -29,9 +29,7 @@ public class ClickerGM : MonoBehaviour
     // text for the strength of click displayed on main genrate button
     public Text ClickStrengthTxt;
     // text for the energy per second
-    public Text EnergyPerSecTxt;
-
-    public Text LevelTxt;
+    public Text EnergyPerSecTxt;   
 
     public float strengthMult = 1.08f;
     public float energyMult = 2f;
@@ -61,6 +59,10 @@ public class ClickerGM : MonoBehaviour
     private int upgradesStrengthOfClick = 0;
     private int upgradesEPerSec = 0;
 
+    //sound
+    AudioSource audioSource;
+    AudioClip audioClip;
+
     #endregion private
 
     private void Awake()
@@ -79,6 +81,9 @@ public class ClickerGM : MonoBehaviour
 
         /*if we're going to get a save system, then here we could calculate all thevalues based on the level of upgrades*/
         StartCoroutine(AddEnergyPerSecond());
+
+        audioSource = gameObject.GetComponent<AudioSource>();
+        audioClip = audioSource.clip;
     }
 
     // Update is called once per frame
@@ -91,6 +96,9 @@ public class ClickerGM : MonoBehaviour
     public void GenerateClick()
     {
         ConvertAndAddToCoins(clickStrength);//coins += clickStrength * levelCoinsPerEnergy;        
+
+        //play sound
+        audioSource.PlayOneShot(audioClip);
     }
 
     internal void ConvertAndAddToCoins(double value)
@@ -139,7 +147,7 @@ public class ClickerGM : MonoBehaviour
     public void SetLevel(double targetValue)
     {
         levelCoinsPerEnergy = targetValue;        
-        LevelTxt.text = levelCoinsPerEnergy.ToString();
+        
         CoinsPerEnergy.text = "1 energy = " + levelCoinsPerEnergy + " coins";
 
         SetEPerSec(0);
