@@ -91,6 +91,12 @@ public class ClickerGM : MonoBehaviour
         CoinsScoreTxt.text = coins.ToString();
     }
 
+    internal void PayCost(double value)
+    {
+        coins -= value;
+        CoinsScoreTxt.text = coins.ToString();
+    }
+
     public double GetCurrentCoins() { return coins; }
 
     public double GetClickStrength() { return clickStrength; }

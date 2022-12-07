@@ -53,8 +53,8 @@ public class UpgradeButton : MonoBehaviour
             numberOfUpgrades++;
 
             //deduct the cost from coins
-            currentScore -= cost;
-            gameManager.ConvertAndAddToCoins((-1)*cost);
+            //currentScore -= cost;
+            gameManager.PayCost(cost);
 
             //setting new value based on baseValue and number of upgrades
             double targetValue = CalculateValue();       
