@@ -11,10 +11,19 @@ public enum UpgradeType
     EnergyPerSecond,
     Level
 }
+
+public enum EnergyUpgradeSubtypes
+{
+    None,
+    SolarPanel,
+    Tourbines,
+    Robot
+}
 public class UpgradeButton : MonoBehaviour
 {
     public Transform gameManagerTransform;
     public UpgradeType upgradeType;
+    public EnergyUpgradeSubtypes energyUpgradeSubtypes = EnergyUpgradeSubtypes.None;
     public double baseCost=10;
     public double costMultiplyer=1;
     public int valueMultiplyer = 1;
@@ -60,6 +69,7 @@ public class UpgradeButton : MonoBehaviour
             double targetValue = CalculateValue();       
             
             SendTargetValue(targetValue);
+            SetUpgradeVisibility();
 
             //setting new cost
             cost = Mathf.Floor((float)((baseCost + numberOfUpgrades) * Mathf.Pow((float)costMultiplyer, numberOfUpgrades)));
@@ -69,6 +79,41 @@ public class UpgradeButton : MonoBehaviour
 
             PlaySound();
         }
+    }
+
+    private void SetUpgradeVisibility()
+    {
+        int upgradeIndex=-1;
+
+        if ( numberOfUpgrades == 1 && upgradeType == UpgradeType.EnergyPerSecond)
+        {
+            switch (energyUpgradeSubtypes)
+            {
+                case EnergyUpgradeSubtypes.None:
+                    return;
+                case EnergyUpgradeSubtypes.SolarPanel:
+                    upgradeIndex = 0;
+                    break;
+                case EnergyUpgradeSubtypes.Tourbines:
+                    upgradeIndex = 1;
+                    break;
+                case EnergyUpgradeSubtypes.Robot:
+                    upgradeIndex = 2;
+                    break;               
+                default:
+                    return;
+            }
+
+            gameManager.TurnOnUpgradeVisibility(upgradeIndex);
+        }
+        else if(upgradeType == UpgradeType.Level)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                gameManager.TurnOffUpgradeVisibility(i);
+            }
+        }
+
     }
 
     private void PlaySound()

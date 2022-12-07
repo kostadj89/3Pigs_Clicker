@@ -38,7 +38,9 @@ public class ClickerGM : MonoBehaviour
 
     public Text CoinsPerEnergy;
 
-
+    public GameObject Upgrade1;
+    public GameObject Upgrade2;
+    public GameObject Upgrade3;
     #endregion public
 
     #region private
@@ -69,6 +71,12 @@ public class ClickerGM : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //turn off upgrade visibility
+        for (int i = 0; i < 3; i++)
+        {
+            TurnOffUpgradeVisibility(i);
+        }
+
         /*if we're going to get a save system, then here we could calculate all thevalues based on the level of upgrades*/
         StartCoroutine(AddEnergyPerSecond());
     }
@@ -147,6 +155,36 @@ public class ClickerGM : MonoBehaviour
     internal void AddToUpgradeButtons(UpgradeButton upgradeButton)
     {
         upgradeButtons.Add(upgradeButton);
+    }
+
+    internal void TurnOnUpgradeVisibility(int upgradeIndex)
+    {
+        switch (upgradeIndex)
+        {
+            case 0:
+                Upgrade1.SetActive(true); break;
+            case 1:
+                Upgrade2.SetActive(true); break;
+            case 2:
+                Upgrade3.SetActive(true); break;
+            default:
+                break;
+        }
+    }
+
+    internal void TurnOffUpgradeVisibility(int upgradeIndex)
+    {
+        switch (upgradeIndex)
+        {
+            case 0:
+                Upgrade1.SetActive(false); break;
+            case 1:
+                Upgrade2.SetActive(false); break;
+            case 2:
+                Upgrade3.SetActive(false); break;
+            default:
+                break;
+        }
     }
     #endregion coroutine
 }
