@@ -70,10 +70,15 @@ public class ClickerGM : MonoBehaviour
 
     public InputField coinsCheatInput;
 
+    //cameras    
+    public Camera Camera1;
+    public Camera Camera2;
+
     //help menu
+    public Canvas HelpCanvas;
 
     #endregion public
-    public Canvas HelpCanvas;
+
     #region private
 
     //list of upgrade bttns
@@ -97,7 +102,10 @@ public class ClickerGM : MonoBehaviour
     AudioClip audioClip;
 
     //level look
-    LevelTypes currentLevelType = LevelTypes.Grassland;  
+    LevelTypes currentLevelType = LevelTypes.Grassland;
+
+    //cameras
+    private bool camera1Active;
 
     #endregion private
 
@@ -126,6 +134,9 @@ public class ClickerGM : MonoBehaviour
 
         //setup particle systems
         ChangeParticleSystems(0);
+
+        camera1Active = false;
+        ToggleCamera();
     }
 
     // Update is called once per frame
@@ -356,6 +367,22 @@ public class ClickerGM : MonoBehaviour
     {
         //works only for android
         Application.Quit();
+    }
+
+    public void ToggleCamera() 
+    {
+        if (camera1Active)
+        {
+            camera1Active = false;
+            Camera1.enabled = false;
+            Camera2.enabled = true;
+        }
+        else 
+        {
+            camera1Active = true;
+            Camera1.enabled = true;
+            Camera2.enabled = false;
+        }
     }
 
     #endregion debug menu
