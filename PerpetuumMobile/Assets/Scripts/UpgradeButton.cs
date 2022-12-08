@@ -48,6 +48,9 @@ public class UpgradeButton : MonoBehaviour
     private AudioSource audioSource;
     private AudioClip audioClip;
 
+    private bool clickEnabled;
+    private Button button;
+
     #endregion private
 
     // Start is called before the first frame update
@@ -63,39 +66,51 @@ public class UpgradeButton : MonoBehaviour
         //get sounds
         audioSource = gameObject.GetComponent<AudioSource>();
         audioClip = audioSource.clip;
+
+        button = gameObject.GetComponentInChildren<Button>();
     }
 
     // Update is called once per frame
     void Update()
     {
-    }
-
-    public void Upgrade()
-    {
         double currentScore = gameManager.GetCurrentCoins();
         if (currentScore >= cost)
         {
-            //inc number of bought upgrades
-            numberOfUpgrades++;
-
-            //deduct the cost from coins
-            //currentScore -= cost;
-            gameManager.PayCost(cost);
-
-            //setting new value based on baseValue and number of upgrades
-            double targetValue = CalculateValue();       
-            
-            SendTargetValue(targetValue);
-            SetUpgradeVisibility();
-
-            //setting new cost
-            cost = Mathf.Floor((float)((baseCost + numberOfUpgrades) * Mathf.Pow((float)costMultiplyer, numberOfUpgrades)));
-
-            numberOfUpgradesTxt.text = upgradeType == UpgradeType.Level ? "LEVEL UP" : numberOfUpgrades.ToString();
-            costTxt.text = cost.ToString();
-
-            PlaySound();
+            button.enabled = true;
+            button.interactable = true;
         }
+        else
+        {
+            button.enabled = false;
+            button.interactable = false;
+        }
+     }
+
+    public void Upgrade()
+    {        
+        //inc number of bought upgrades
+        numberOfUpgrades++;
+
+        //deduct the cost from coins
+        //currentScore -= cost;
+        gameManager.PayCost(cost);
+
+        //setting new value based on baseValue and number of upgrades
+        double targetValue = CalculateValue();       
+        
+        SendTargetValue(targetValue);
+        SetUpgradeVisibility();
+
+        //setting new cost
+        cost = Mathf.Floor((float)((baseCost + numberOfUpgrades) * Mathf.Pow((float)costMultiplyer, numberOfUpgrades)));
+
+        numberOfUpgradesTxt.text = upgradeType == UpgradeType.Level ? "LEVEL UP" : numberOfUpgrades.ToString();
+        costTxt.text = cost.ToString();
+
+        if (gameManager.SoundOn)
+        {
+            PlaySound();
+        }            
     }
 
     private void SetUpgradeVisibility()
@@ -189,4 +204,6 @@ public class UpgradeButton : MonoBehaviour
         costTxt.text = cost.ToString();
         
     }
+
+    
 }

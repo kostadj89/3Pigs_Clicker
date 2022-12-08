@@ -60,6 +60,16 @@ public class ClickerGM : MonoBehaviour
     //desert particle systems
     public List<GameObject> PSObjects;
 
+    //menu
+    public Canvas MenuCanvas;
+
+    public bool SoundOn = true;
+    public Text SoundText;
+
+    public GameObject BGMusicPlayer;
+
+    public InputField coinsCheatInput;
+
     #endregion public
 
     #region private
@@ -92,6 +102,7 @@ public class ClickerGM : MonoBehaviour
     void Awake()
     {
         upgradeButtons = new List<UpgradeButton>();
+        CloseDebugMenu();
     }
 
     // Start is called before the first frame update
@@ -121,12 +132,19 @@ public class ClickerGM : MonoBehaviour
     }
 
     #region methods
+
+    #region coins
+
+    //click event of the main generate button, user generates energy which is then converted to coins
     public void GenerateClick()
     {
         ConvertAndAddToCoins(clickStrength);//coins += clickStrength * levelCoinsPerEnergy;        
 
-        //play sound
-        audioSource.PlayOneShot(audioClip);
+        if (SoundOn)
+        {
+            //play sound
+            audioSource.PlayOneShot(audioClip);
+        }        
     }
 
     internal void ConvertAndAddToCoins(double value)
@@ -135,6 +153,7 @@ public class ClickerGM : MonoBehaviour
         CoinsScoreTxt.text = coins.ToString();
     }
 
+    //called when purchasing an upgrade
     internal void PayCost(double value)
     {
         coins -= value;
@@ -143,6 +162,10 @@ public class ClickerGM : MonoBehaviour
 
     public double GetCurrentCoins() { return coins; }
 
+    #endregion coins
+
+    #region upgrades
+    
     public double GetClickStrength() { return clickStrength; }
     
     public void SetClickStrength(double value) { clickStrength = value; ClickStrengthTxt.text = clickStrength.ToString(); }
@@ -154,115 +177,6 @@ public class ClickerGM : MonoBehaviour
 
     public double GetCoinsPerE() { return levelCoinsPerEnergy; }
     public void SetCoinsPerE(double value) { levelCoinsPerEnergy = value;  }
-    #endregion methods
-
-    #region coroutine
-    IEnumerator AddEnergyPerSecond()
-    {
-        while (true)
-        {           
-            ConvertAndAddToCoins(energyPerSec);
-
-            yield return new WaitForSeconds(1);
-        }
-    }
-
-    public int GetBaseLevel()
-    {
-        return baseLevel;
-    }
-
-    public void SetLevel(double targetValue)
-    {
-        levelCoinsPerEnergy = targetValue;        
-        
-        CoinsPerEnergy.text = "1 energy = " + levelCoinsPerEnergy + " coins";
-
-        SetEPerSec(0);
-        SetClickStrength(1);
-
-        //when we get to the higher level energy is worth more money(coins ie on level 2, 1 energy will be 2 coins(coins points) ), but we reset all of the upgrades
-        foreach (UpgradeButton upgradeButton in upgradeButtons)
-        {
-            upgradeButton.ResetUpgrades();
-        }
-
-        PrepareLevelVisuals();
-    }
-
-    private void PrepareLevelVisuals()
-    {
-        /*
-        levelIndex determins the type of ground
-        0-Grass
-        1-Sand
-        2-Snow
-        3-Volcanic
-        */
-        int levelIndex = (int)levelCoinsPerEnergy % 4;
-
-        //change ground material
-        ChangeGroundMaterial(levelIndex);
-
-        //change main camera background color
-        ChangeCameraColor();
-
-        //activate apropriate particle systems
-        ChangeParticleSystems(levelIndex);
-    }
-
-    private void ChangeParticleSystems(int levelIndex)
-    {
-        //really bad i know, desert 
-        if (levelIndex == 1)
-        {
-            foreach (GameObject g in PSObjects)
-            {
-                ParticleSystem ps = g.GetComponent<ParticleSystem>();
-
-                if (g.tag != "Desert") { ps.Stop(); }
-                else { ps.Play(); }
-            }
-        }
-        // lava
-        else if (levelIndex == 3)
-        {
-            foreach (GameObject g in PSObjects)
-            {
-                ParticleSystem ps = g.GetComponent<ParticleSystem>();
-
-                if (g.tag != "Lava") { ps.Stop(); }
-                else { ps.Play(); }
-            }
-        }
-        //others
-        else
-        {
-            foreach (GameObject g in PSObjects)
-            {
-                ParticleSystem ps = g.GetComponent<ParticleSystem>();
-
-                if (g.tag != "Desert" && g.tag != "Lava") ps.Play();
-                else ps.Stop();
-            }
-        }
-        
-    }
-
-    private void ChangeCameraColor()
-    {
-        Color color = Random.ColorHSV(0, 1, 0.75f, 1);
-        Camera.main.backgroundColor = color;
-    }
-
-    private void ChangeGroundMaterial(int levelIndex)
-    {
-        MeshRenderer groundMeshRenderer = GroundPlane.GetComponent<MeshRenderer>();
-        groundMeshRenderer.material = groundMaterials[levelIndex];
-
-        ParticleSystemRenderer psr = groundLandscape.GetComponentInChildren<ParticleSystemRenderer>();
-        psr.material = groundMeshRenderer.material;
-    }
 
     internal void AddToUpgradeButtons(UpgradeButton upgradeButton)
     {
@@ -298,5 +212,164 @@ public class ClickerGM : MonoBehaviour
                 break;
         }
     }
+
+    #endregion upgrades
+
+    #region level management
+
+    public int GetBaseLevel()
+    {
+        return baseLevel;
+    }
+
+    public void SetLevel(double targetValue)
+    {
+        levelCoinsPerEnergy = targetValue;
+
+        CoinsPerEnergy.text = "1 energy = " + levelCoinsPerEnergy + " coins";
+
+        SetEPerSec(0);
+        SetClickStrength(1);
+
+        //when we get to the higher level energy is worth more money(coins ie on level 2, 1 energy will be 2 coins(coins points) ), but we reset all of the upgrades
+        foreach (UpgradeButton upgradeButton in upgradeButtons)
+        {
+            upgradeButton.ResetUpgrades();
+        }
+
+        PrepareLevelVisuals();
+    }
+
+    private void PrepareLevelVisuals()
+    {
+        /*
+        levelIndex determins the type of ground
+        0-Grass
+        1-Sand
+        2-Snow
+        3-Volcanic
+        */
+        int levelIndex = (int)levelCoinsPerEnergy % 4;
+
+        //change ground material
+        ChangeGroundMaterial(levelIndex);
+
+        //change main camera background color
+        ChangeCameraColor();
+
+        //activate apropriate particle systems
+        ChangeParticleSystems(levelIndex);
+    }
+    private void ChangeParticleSystems(int levelIndex)
+    {
+        //really bad i know, desert 
+        if (levelIndex == 1)
+        {
+            foreach (GameObject g in PSObjects)
+            {
+                ParticleSystem ps = g.GetComponent<ParticleSystem>();
+
+                if (g.tag != "Desert") { ps.Stop(); }
+                else { ps.Play(); }
+            }
+        }
+        // lava
+        else if (levelIndex == 3)
+        {
+            foreach (GameObject g in PSObjects)
+            {
+                ParticleSystem ps = g.GetComponent<ParticleSystem>();
+
+                if (g.tag != "Lava") { ps.Stop(); }
+                else { ps.Play(); }
+            }
+        }
+        //others
+        else
+        {
+            foreach (GameObject g in PSObjects)
+            {
+                ParticleSystem ps = g.GetComponent<ParticleSystem>();
+
+                if (g.tag != "Desert" && g.tag != "Lava") ps.Play();
+                else ps.Stop();
+            }
+        }
+
+    }
+
+    private void ChangeCameraColor()
+    {
+        Color color = Random.ColorHSV(0, 1, 0.75f, 1);
+        Camera.main.backgroundColor = color;
+    }
+
+    private void ChangeGroundMaterial(int levelIndex)
+    {
+        MeshRenderer groundMeshRenderer = GroundPlane.GetComponent<MeshRenderer>();
+        groundMeshRenderer.material = groundMaterials[levelIndex];
+
+        ParticleSystemRenderer psr = groundLandscape.GetComponentInChildren<ParticleSystemRenderer>();
+        psr.material = groundMeshRenderer.material;
+    }
+
+    #endregion level management
+
+    #region menu
+    
+    public void OpenDebugMenu()
+    {
+        MenuCanvas.enabled = true;
+    }
+    public void CloseDebugMenu()
+    {
+        MenuCanvas.enabled = false;
+    }
+
+    public void ToogleSound()
+    {
+        AudioSource bgAudioSource = BGMusicPlayer.GetComponent<AudioSource>();
+
+        if (SoundOn)
+        {
+            SoundOn = false;
+            bgAudioSource.Pause();
+            SoundText.text = "SOUND OFF";
+        }
+        else
+        {
+            SoundOn = true;
+            bgAudioSource.Play();
+            SoundText.text = "SOUND ON";
+        }
+    }
+
+    public void CheatAddCoins()
+    {
+        PayCost((-1) * Double.Parse(coinsCheatInput.text));
+    }
+
+    public void ExitGame()
+    {
+        //works only for android
+        Application.Quit();
+    }
+
+    #endregion menu
+
+    #endregion methods
+
+    #region coroutine
+    IEnumerator AddEnergyPerSecond()
+    {
+        while (true)
+        {           
+            ConvertAndAddToCoins(energyPerSec);
+
+            yield return new WaitForSeconds(1);
+        }
+    }
+
+    
     #endregion coroutine
 }
