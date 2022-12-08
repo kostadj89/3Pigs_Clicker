@@ -60,7 +60,7 @@ public class ClickerGM : MonoBehaviour
     //desert particle systems
     public List<GameObject> PSObjects;
 
-    //menu
+    //debug menu
     public Canvas MenuCanvas;
 
     public bool SoundOn = true;
@@ -70,8 +70,10 @@ public class ClickerGM : MonoBehaviour
 
     public InputField coinsCheatInput;
 
-    #endregion public
+    //help menu
 
+    #endregion public
+    public Canvas HelpCanvas;
     #region private
 
     //list of upgrade bttns
@@ -103,6 +105,7 @@ public class ClickerGM : MonoBehaviour
     {
         upgradeButtons = new List<UpgradeButton>();
         CloseDebugMenu();
+        CloseHelpMenu();
     }
 
     // Start is called before the first frame update
@@ -315,7 +318,7 @@ public class ClickerGM : MonoBehaviour
 
     #endregion level management
 
-    #region menu
+    #region debug menu
     
     public void OpenDebugMenu()
     {
@@ -355,7 +358,19 @@ public class ClickerGM : MonoBehaviour
         Application.Quit();
     }
 
-    #endregion menu
+    #endregion debug menu
+
+    #region help menu
+    public void OpenHelpMenu()
+    {
+        HelpCanvas.enabled = true;
+    }
+    public void CloseHelpMenu()
+    {
+        HelpCanvas.enabled = false;
+    }
+
+    #endregion help menu
 
     #endregion methods
 
