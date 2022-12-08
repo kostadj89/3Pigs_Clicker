@@ -360,7 +360,13 @@ public class ClickerGM : MonoBehaviour
 
     public void CheatAddCoins()
     {
-        PayCost((-1) * Double.Parse(coinsCheatInput.text));
+        double cheatCoins;
+        bool isNotEmpty = Double.TryParse(coinsCheatInput.text,out cheatCoins);
+
+        if (isNotEmpty && cheatCoins > 1000000)
+            cheatCoins = 1000000;
+
+        PayCost((-1) * cheatCoins);
     }
 
     public void ExitGame()
