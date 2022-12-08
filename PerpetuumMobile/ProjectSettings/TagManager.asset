@@ -4,10 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Lava
-  - Grass
-  - Snow
+  - UIParticleSystem
   - Desert
+  - Lava
   layers:
   - Default
   - TransparentFX

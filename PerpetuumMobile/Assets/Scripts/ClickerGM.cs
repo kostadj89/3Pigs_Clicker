@@ -4,6 +4,15 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
+
+enum LevelTypes
+{
+    Grassland,
+    Desert,
+    SnowWaste,
+    Volcanic
+}
 
 public class ClickerGM : MonoBehaviour
 {
@@ -39,6 +48,18 @@ public class ClickerGM : MonoBehaviour
     public GameObject Upgrade1;
     public GameObject Upgrade2;
     public GameObject Upgrade3;
+
+    //level look
+    public GameObject GroundPlane;
+    //this will be a fixed list of 4 materials, it could be changed in the future
+    public List<Material> groundMaterials;
+
+    //will get PS_Ground, and we'll match material with the ground material
+    public GameObject groundLandscape;
+
+    //desert particle systems
+    public List<GameObject> PSObjects;
+
     #endregion public
 
     #region private
@@ -63,9 +84,12 @@ public class ClickerGM : MonoBehaviour
     AudioSource audioSource;
     AudioClip audioClip;
 
+    //level look
+    LevelTypes currentLevelType = LevelTypes.Grassland;  
+
     #endregion private
 
-    private void Awake()
+    void Awake()
     {
         upgradeButtons = new List<UpgradeButton>();
     }
@@ -82,8 +106,12 @@ public class ClickerGM : MonoBehaviour
         /*if we're going to get a save system, then here we could calculate all thevalues based on the level of upgrades*/
         StartCoroutine(AddEnergyPerSecond());
 
+        //initialize audio
         audioSource = gameObject.GetComponent<AudioSource>();
         audioClip = audioSource.clip;
+
+        //setup particle systems
+        ChangeParticleSystems(0);
     }
 
     // Update is called once per frame
@@ -158,6 +186,82 @@ public class ClickerGM : MonoBehaviour
         {
             upgradeButton.ResetUpgrades();
         }
+
+        PrepareLevelVisuals();
+    }
+
+    private void PrepareLevelVisuals()
+    {
+        /*
+        levelIndex determins the type of ground
+        0-Grass
+        1-Sand
+        2-Snow
+        3-Volcanic
+        */
+        int levelIndex = (int)levelCoinsPerEnergy % 4;
+
+        //change ground material
+        ChangeGroundMaterial(levelIndex);
+
+        //change main camera background color
+        ChangeCameraColor();
+
+        //activate apropriate particle systems
+        ChangeParticleSystems(levelIndex);
+    }
+
+    private void ChangeParticleSystems(int levelIndex)
+    {
+        //really bad i know, desert 
+        if (levelIndex == 1)
+        {
+            foreach (GameObject g in PSObjects)
+            {
+                ParticleSystem ps = g.GetComponent<ParticleSystem>();
+
+                if (g.tag != "Desert") { ps.Stop(); }
+                else { ps.Play(); }
+            }
+        }
+        // lava
+        else if (levelIndex == 3)
+        {
+            foreach (GameObject g in PSObjects)
+            {
+                ParticleSystem ps = g.GetComponent<ParticleSystem>();
+
+                if (g.tag != "Lava") { ps.Stop(); }
+                else { ps.Play(); }
+            }
+        }
+        //others
+        else
+        {
+            foreach (GameObject g in PSObjects)
+            {
+                ParticleSystem ps = g.GetComponent<ParticleSystem>();
+
+                if (g.tag != "Desert" && g.tag != "Lava") ps.Play();
+                else ps.Stop();
+            }
+        }
+        
+    }
+
+    private void ChangeCameraColor()
+    {
+        Color color = Random.ColorHSV(0, 1, 0.75f, 1);
+        Camera.main.backgroundColor = color;
+    }
+
+    private void ChangeGroundMaterial(int levelIndex)
+    {
+        MeshRenderer groundMeshRenderer = GroundPlane.GetComponent<MeshRenderer>();
+        groundMeshRenderer.material = groundMaterials[levelIndex];
+
+        ParticleSystemRenderer psr = groundLandscape.GetComponentInChildren<ParticleSystemRenderer>();
+        psr.material = groundMeshRenderer.material;
     }
 
     internal void AddToUpgradeButtons(UpgradeButton upgradeButton)
